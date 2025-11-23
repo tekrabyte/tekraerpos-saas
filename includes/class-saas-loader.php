@@ -4,18 +4,15 @@ if (!defined('ABSPATH')) exit;
 class TEKRAERPOS_SaaS_Loader {
 
     public static function init() {
-        // CORS Setup (Priority 0 agar jalan sebelum REST API default)
+        // CORS Setup
         add_action('init', function() {
             $origin = get_http_origin();
-            
-            // Daftar Origin yang diizinkan (Localhost & Production)
             $allowed_origins = [
                 'http://localhost:5173',
                 'http://127.0.0.1:5173',
                 'https://dashboard.tekrabyte.id'
             ];
 
-            // Jika origin valid atau server tidak mengirim origin (kadang terjadi di tools postman)
             if ($origin && in_array($origin, $allowed_origins)) {
                 header("Access-Control-Allow-Origin: " . $origin);
                 header("Access-Control-Allow-Credentials: true");
@@ -23,7 +20,6 @@ class TEKRAERPOS_SaaS_Loader {
                 header("Access-Control-Allow-Headers: Authorization, Content-Type, X-WP-Nonce");
             }
             
-            // Handle Preflight Request (OPTIONS)
             if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
                 status_header(200);
                 exit();
@@ -70,15 +66,20 @@ class TEKRAERPOS_SaaS_Loader {
         foreach($files as $file) if (file_exists(TEKRAERPOS_SAAS_DIR . $file)) require_once TEKRAERPOS_SAAS_DIR . $file;
     }
 
-    private static function load_modules() {
-        // PERBAIKAN DI SINI: Menambahkan 'plans' ke dalam array
-        $apis = ['signup', 'auth', 'dashboard', 'products', 'orders', 'outlet', 'employees', 'subscription', 'xendit-webhook', 'tenant-settings', 'health', 'billing', 'plans'];
+   private static function load_modules() {
+        // Tambahkan 'data' ke dalam array. 'tenant-settings' sudah ada.
+        $apis = [
+            'signup', 'auth', 'dashboard', 'products', 'orders', 'outlet', 
+            'employees', 'subscription', 'xendit-webhook', 'tenant-settings', 
+            'health', 'billing', 'data' // <--- HANYA TAMBAH INI
+        ];
         
         foreach($apis as $api) {
             $f = TEKRAERPOS_SAAS_DIR . "rest/class-rest-$api.php";
             if (file_exists($f)) require_once $f;
         }
         
+        // Load Public Classes
         if (file_exists(TEKRAERPOS_SAAS_DIR . 'public/class-public-router.php')) {
              require_once TEKRAERPOS_SAAS_DIR . 'public/class-public-router.php';
              TEKRAERPOS_Public_Router::get_instance();
