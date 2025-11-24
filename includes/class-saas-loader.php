@@ -71,7 +71,7 @@ class TEKRAERPOS_SaaS_Loader {
         $apis = [
             'signup', 'auth', 'dashboard', 'products', 'orders', 'outlet', 
             'employees', 'subscription', 'xendit-webhook', 'tenant-settings', 
-            'health', 'billing', 'data' // <--- HANYA TAMBAH INI
+            'health', 'billing', 'data', 'upload' // <--- HANYA TAMBAH INI
         ];
         
         foreach($apis as $api) {

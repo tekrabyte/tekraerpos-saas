@@ -9,78 +9,62 @@ export default function Bundles() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [editData, setEditData] = useState(null);
-    const [formData, setFormData] = useState({ name: '', description: '', price: '0', items: '' });
+    
+    const defaultForm = { name: '', description: '', price: 0, items: '', sku: '' };
+    const [formData, setFormData] = useState(defaultForm);
 
-    useEffect(() => { loadData(); }, []);
-
-    async function loadData() {
+    const loadData = async () => {
         setLoading(true);
         try {
-            const res = await api.get('/library/bundles');
-            setData(res.data.bundles || []);
-        } catch (error) {
-            console.error('Failed to load bundles:', error);
-            setData([]);
-        } finally { setLoading(false); }
-    }
+            // PERBAIKAN: Endpoint /tenant/data/bundles
+            const res = await api.get('/tenant/data/bundles');
+            setData(res.data.data || []);
+        } catch (e) {} finally { setLoading(false); }
+    };
+
+    useEffect(() => { loadData(); }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            if (editData) {
-                await api.put(`/library/bundles/${editData.id}`, formData);
-            } else {
-                await api.post('/library/bundles', formData);
-            }
+            if (formData.id) await api.put(`/tenant/data/bundles/${formData.id}`, formData);
+            else await api.post('/tenant/data/bundles', formData);
+            
             setShowModal(false);
-            setFormData({ name: '', description: '', price: '0', items: '' });
-            setEditData(null);
             loadData();
-        } catch (error) {
-            alert('Gagal menyimpan data: ' + error.message);
-        }
+        } catch (e) { alert("Gagal menyimpan."); }
     };
 
-    const handleEdit = (item) => {
-        setEditData(item);
-        setFormData({ name: item.name, description: item.description || '', price: item.price, items: item.items || '' });
-        setShowModal(true);
-    };
-
-    const handleDelete = async (item) => {
-        if (confirm(`Hapus paket "${item.name}"?`)) {
-            try {
-                await api.delete(`/library/bundles/${item.id}`);
-                loadData();
-            } catch (error) {
-                alert('Gagal menghapus: ' + error.message);
-            }
+    const handleDelete = async (id) => {
+        if (confirm("Hapus paket bundle ini?")) {
+            await api.delete(`/tenant/data/bundles/${id}`);
+            loadData();
         }
     };
 
     const columns = [
-        { header: 'Nama Paket', accessor: (item) => item.name || '-' },
-        { header: 'Deskripsi', accessor: (item) => item.description || '-' },
-        { header: 'Harga Paket', accessor: (item) => `Rp ${parseInt(item.price || 0).toLocaleString()}` },
-        { header: 'Jumlah Item', accessor: (item) => item.item_count || '0' }
+        { header: 'Nama Paket', accessor: (item) => item.name },
+        { header: 'Harga Jual', accessor: (item) => `Rp ${parseInt(item.price).toLocaleString()}` },
+        { header: 'SKU Bundle', accessor: (item) => item.sku || '-' }
     ];
 
     return (
         <div>
-            <PageHeader title="Bundle Package" subtitle="Kelola paket bundling produk" />
-            <DataTable columns={columns} data={data} loading={loading} onAdd={() => setShowModal(true)} onEdit={handleEdit} onDelete={handleDelete} searchPlaceholder="Cari paket..." />
+            <PageHeader title="Bundle Packages" subtitle="Kelola paket bundling produk" />
+            <DataTable columns={columns} data={data} loading={loading} onAdd={() => { setFormData(defaultForm); setShowModal(true); }} onEdit={(item) => { setFormData(item); setShowModal(true); }} onDelete={(item) => handleDelete(item.id)} />
 
-            <Modal isOpen={showModal} onClose={() => { setShowModal(false); setEditData(null); }} title={editData ? 'Edit Paket' : 'Tambah Paket'}>
+            <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Form Bundle">
                 <form onSubmit={handleSubmit}>
-                    <FormField label="Nama Paket" name="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="Contoh: Paket Hemat 1" />
-                    <FormField label="Deskripsi" name="description" type="textarea" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Deskripsi paket" />
-                    <FormField label="Harga Paket" name="price" type="number" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required placeholder="0" />
-                    <FormField label="Item dalam Paket" name="items" type="textarea" value={formData.items} onChange={(e) => setFormData({ ...formData, items: e.target.value })} placeholder="ID produk, pisahkan dengan koma" />
-                    <div className="flex justify-end gap-2 mt-6">
-                        <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Batal</button>
-                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Simpan</button>
+                    <FormField label="Nama Paket" name="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField label="Harga Paket" name="price" type="number" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required />
+                        <FormField label="SKU Bundle" name="sku" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} />
                     </div>
+                    <FormField label="Deskripsi" name="description" type="textarea" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                    
+                    <p className="text-xs text-gray-500 mt-2 mb-4">*Fitur pemilihan item produk dalam bundle akan segera hadir.</p>
+
+                    <button className="w-full bg-blue-600 text-white py-2 rounded mt-4 font-bold">Simpan</button>
                 </form>
             </Modal>
         </div>

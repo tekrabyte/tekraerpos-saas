@@ -6,7 +6,6 @@
             <tr><th>Name</th><td><input name="name" value="<?php echo $t->name ?>" class="regular-text"/></td></tr>
             <tr><th>Slug</th><td><input name="slug" value="<?php echo $t->slug ?>" class="regular-text"/></td></tr>
             <tr><th>Email</th><td><input name="email" value="<?php echo $t->email ?>" class="regular-text"/></td></tr>
-            <tr><th>Phone</th><td><input name="phone" value="<?php echo $t->phone ?>" class="regular-text"/></td></tr>
             <tr><th>Plan</th>
                 <td>
                     <select name="plan_id">

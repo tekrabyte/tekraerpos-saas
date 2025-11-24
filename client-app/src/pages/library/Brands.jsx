@@ -9,25 +9,37 @@ export default function Brands() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [editData, setEditData] = useState(null);
-    const [formData, setFormData] = useState({ name: '', description: '', website: '' });
 
-    useEffect(() => { loadData(); }, []);
+    const defaultForm = { name: '', description: '', website: '' };
+    const [formData, setFormData] = useState(defaultForm);
 
-    async function loadData() {
+    const loadData = async () => {
         setLoading(true);
         try {
-            const res = await api.get('/library/brands');
-            setData(res.data.brands || []);
-        } catch (error) { console.error('Failed to load brands:', error); setData([]); } finally { setLoading(false); }
-    }
+            // PERBAIKAN: Endpoint /tenant/data/brands
+            const res = await api.get('/tenant/data/brands');
+            setData(res.data.data || []);
+        } catch (e) {} finally { setLoading(false); }
+    };
+
+    useEffect(() => { loadData(); }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            if (editData) { await api.put(`/library/brands/${editData.id}`, formData); } else { await api.post('/library/brands', formData); }
-            setShowModal(false); setFormData({ name: '', description: '', website: '' }); setEditData(null); loadData();
-        } catch (error) { alert('Gagal menyimpan data: ' + error.message); }
+            if (formData.id) await api.put(`/tenant/data/brands/${formData.id}`, formData);
+            else await api.post('/tenant/data/brands', formData);
+            
+            setShowModal(false);
+            loadData();
+        } catch (e) { alert("Gagal menyimpan."); }
+    };
+
+    const handleDelete = async (id) => {
+        if (confirm("Hapus brand ini?")) {
+            await api.delete(`/tenant/data/brands/${id}`);
+            loadData();
+        }
     };
 
     const columns = [
@@ -38,18 +50,15 @@ export default function Brands() {
 
     return (
         <div>
-            <PageHeader title="Brands" subtitle="Kelola brand produk" />
-            <DataTable columns={columns} data={data} loading={loading} onAdd={() => setShowModal(true)} onEdit={(item) => { setEditData(item); setFormData({ name: item.name, description: item.description || '', website: item.website || '' }); setShowModal(true); }} onDelete={async (item) => { if (confirm(`Hapus brand "${item.name}"?`)) { await api.delete(`/library/brands/${item.id}`); loadData(); } }} searchPlaceholder="Cari brand..." />
+            <PageHeader title="Brands" subtitle="Kelola merk produk" />
+            <DataTable columns={columns} data={data} loading={loading} onAdd={() => { setFormData(defaultForm); setShowModal(true); }} onEdit={(item) => { setFormData(item); setShowModal(true); }} onDelete={(item) => handleDelete(item.id)} />
 
-            <Modal isOpen={showModal} onClose={() => { setShowModal(false); setEditData(null); }} title={editData ? 'Edit Brand' : 'Tambah Brand'}>
+            <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Form Brand">
                 <form onSubmit={handleSubmit}>
-                    <FormField label="Nama Brand" name="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="Contoh: Samsung, Apple" />
-                    <FormField label="Deskripsi" name="description" type="textarea" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Deskripsi brand" />
-                    <FormField label="Website" name="website" type="url" value={formData.website} onChange={(e) => setFormData({ ...formData, website: e.target.value })} placeholder="https://example.com" />
-                    <div className="flex justify-end gap-2 mt-6">
-                        <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Batal</button>
-                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Simpan</button>
-                    </div>
+                    <FormField label="Nama Brand" name="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                    <FormField label="Deskripsi" name="description" type="textarea" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                    <FormField label="Website" name="website" value={formData.website} onChange={(e) => setFormData({ ...formData, website: e.target.value })} />
+                    <button className="w-full bg-blue-600 text-white py-2 rounded mt-4 font-bold">Simpan</button>
                 </form>
             </Modal>
         </div>
