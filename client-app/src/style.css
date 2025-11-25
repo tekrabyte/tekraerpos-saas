@@ -2,7 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Styles jika perlu */
+/* Custom Styles */
 body {
     background-color: #f3f4f6;
+    font-size: 12px; /* Set global font size */
+    color: #374151;  /* Optional: Default text color (Gray-700) agar konsisten */
 }
+
+/* Optional: Override heading sizes jika ingin proporsional dengan font kecil */
+h1 { font-size: 2em; }
+h2 { font-size: 1.5em; }
+h3 { font-size: 1.17em; }
+h4 { font-size: 1em; }
+h5 { font-size: 0.83em; }
+h6 { font-size: 0.67em; }

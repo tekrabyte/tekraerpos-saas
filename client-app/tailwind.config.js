@@ -5,7 +5,16 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      // Opsional: Anda bisa menambahkan custom font size di sini jika perlu
+    },
   },
-  plugins: [],
+  plugins: [
+    function ({ addBase }) {
+      addBase({
+        'html': { fontSize: '12px' },
+        'body': { fontSize: '12px' },
+      });
+    }
+  ],
 }

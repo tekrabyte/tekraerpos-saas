@@ -9,6 +9,7 @@ class TEKRAERPOS_Admin_Menu {
         require_once __DIR__ . '/class-admin-tenants.php';
         require_once __DIR__ . '/class-admin-plans.php';
         require_once __DIR__ . '/class-admin-subscriptions.php';
+        require_once __DIR__ . '/class-admin-wa.php';
         
         // Cek jika file settings ada (opsional, untuk mencegah error jika file belum dibuat)
         if (file_exists(__DIR__ . '/class-admin-settings.php')) {
@@ -39,7 +40,8 @@ class TEKRAERPOS_Admin_Menu {
             'Tenants',
             'manage_options',
             'tekraerpos-tenants',
-            ['TEKRAERPOS_Admin_Tenants','render'] // Class ini sekarang sudah di-require di __construct
+            ['TEKRAERPOS_Admin_Tenants','render']
+             // Class ini sekarang sudah di-require di __construct
         );
 
         add_submenu_page(
@@ -59,7 +61,14 @@ class TEKRAERPOS_Admin_Menu {
             'tekraerpos-subscriptions',
             ['TEKRAERPOS_Admin_Subscriptions','render']
         );
-        
+        add_submenu_page(
+    'tekraerpos-saas',       // Parent slug
+    'WhatsApp Koneksi',      // Page title
+    'WhatsApp Koneksi',      // Menu title
+    'manage_options',        // Capability
+    'tekraerpos-wa',         // Menu slug
+    ['TEKRAERPOS_Admin_WA', 'render'] // Callback function
+);
         // Tambahan Menu Settings (Jika class-nya ada)
         if (class_exists('TEKRAERPOS_Admin_Settings')) {
             add_submenu_page(
