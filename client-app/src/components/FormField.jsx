@@ -9,12 +9,17 @@ export default function FormField({
     required = false, 
     placeholder = '',
     error = '',
-    options = [], // For select type
-    rows = 3 // For textarea
+    options = [], 
+    rows = 3,
+    disabled = false // Tambahkan prop disabled
 }) {
-    const inputClasses = `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-        error ? 'border-red-500' : 'border-gray-300'
-    }`;
+    // Styling dinamis
+    const baseClasses = "w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors outline-none";
+    const stateClasses = error ? "border-red-500" : "border-gray-300";
+    // Jika disabled, beri background abu-abu
+    const disabledClasses = disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : "bg-white";
+
+    const inputClasses = `${baseClasses} ${stateClasses} ${disabledClasses}`;
 
     return (
         <div className="mb-4">
@@ -32,7 +37,7 @@ export default function FormField({
                     placeholder={placeholder}
                     rows={rows}
                     className={inputClasses}
-                    data-testid={`input-${name}`}
+                    disabled={disabled} // Terapkan
                 />
             ) : type === 'select' ? (
                 <select
@@ -41,7 +46,7 @@ export default function FormField({
                     onChange={onChange}
                     required={required}
                     className={inputClasses}
-                    data-testid={`select-${name}`}
+                    disabled={disabled} // Terapkan
                 >
                     <option value="">Pilih {label}</option>
                     {options.map((opt, idx) => (
@@ -59,15 +64,11 @@ export default function FormField({
                     required={required}
                     placeholder={placeholder}
                     className={inputClasses}
-                    data-testid={`input-${name}`}
+                    disabled={disabled} // Terapkan
                 />
             )}
             
-            {error && (
-                <p className="mt-1 text-sm text-red-600" data-testid={`error-${name}`}>
-                    {error}
-                </p>
-            )}
+            {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
         </div>
     );
 }

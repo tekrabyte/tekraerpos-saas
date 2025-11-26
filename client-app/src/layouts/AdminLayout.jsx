@@ -261,16 +261,6 @@ export default function AdminLayout() {
             {/* Content Area */}
             <main className="flex-1 flex flex-col overflow-hidden bg-gray-50">
                 {/* Header */}
-                <header className="bg-white h-14 border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-20 shadow-sm">
-                    <h1 className="font-bold text-gray-700 capitalize">
-                        {location.pathname.split('/').filter(Boolean).pop()?.replace('-', ' ') || 'Overview'}
-                    </h1>
-                    <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                        <span className="text-xs font-medium text-gray-500">System Operational</span>
-                    </div>
-                </header>
-
                 {/* ALERT TRIAL */}
                 {isTrial && daysLeft > 0 && (
                     <div className="bg-orange-50 border-b border-orange-200 text-orange-800 px-8 py-3 flex justify-between items-center text-sm">
